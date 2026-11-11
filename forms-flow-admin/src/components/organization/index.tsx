@@ -157,9 +157,11 @@ const Organization: React.FC<any> = (props) => {
   // tenantKey is in the key because the response is scoped to the tenant in the bearer
   // token, which the key cannot otherwise see. Without it a tenant switch serves the
   // previous tenant's cached usage, and with retry:false a failed refetch keeps it.
+  // Usage metering is a multi-tenant (billing) feature, so single-tenant skips the request.
   const { data: featureUsage } = useQuery(
     ["usage", tenantKey, SUBMISSION_FEATURE_KEY],
-    () => fetchFeatureUsage(SUBMISSION_FEATURE_KEY)
+    () => fetchFeatureUsage(SUBMISSION_FEATURE_KEY),
+    { enabled: MULTITENANCY_ENABLED }
   );
 
   // Null while loading, on a failed fetch, or when the plan has no metered allowance - the
@@ -181,6 +183,10 @@ const Organization: React.FC<any> = (props) => {
     }
   }, []);
   const isOrganizationManager = userRoles.includes("manage_organization");
+  // Single-tenant shows the Organization page without its billing-only sections:
+  // usage metering and the Terms & Conditions / Policies buttons.
+  const showUsageMetering = MULTITENANCY_ENABLED && isOrganizationManager;
+  const showTermsAndPolicies = MULTITENANCY_ENABLED;
   const showAiSettings = isAiAssistantFeatureEnabled() && isOrganizationManager;
   // The setting lives on the tenant record, so single-tenant has no switch.
   const showGovernedContentSetting =
@@ -261,7 +267,7 @@ const Organization: React.FC<any> = (props) => {
   return (
     <div className="organization-container">
       <div className="organization-content">
-        {isOrganizationManager && usage && (
+        {showUsageMetering && usage && (
           <div className="organization-usage">
             <UsageSummaryCard
               {...usage}
@@ -303,17 +309,19 @@ const Organization: React.FC<any> = (props) => {
           </section>
         )}
 
-        <AccordionSection
-          title={t("Terms & Conditions")}
-          isOpen={termsOpen}
-          onToggle={() => setTermsOpen(!termsOpen)}
-          dataTestId="organization-terms-toggle"
-        >
-          <div className="terms-actions">
-            {renderExternalButtons("View our Terms and Conditions")}
-            {renderExternalButtons("View our Privacy Policy")}
-          </div>
-        </AccordionSection>
+        {showTermsAndPolicies && (
+          <AccordionSection
+            title={t("Terms & Conditions")}
+            isOpen={termsOpen}
+            onToggle={() => setTermsOpen(!termsOpen)}
+            dataTestId="organization-terms-toggle"
+          >
+            <div className="terms-actions">
+              {renderExternalButtons("View our Terms and Conditions")}
+              {renderExternalButtons("View our Privacy Policy")}
+            </div>
+          </AccordionSection>
+        )}
       </div>
     </div>
   );
