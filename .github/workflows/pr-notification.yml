@@ -27,7 +27,7 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     if: >-
-      github.repository == 'AOT-Technologies/forms-flow-ai-micro-front-ends' &&
+      github.repository == 'rintumerin-aot/forms-flow-ai-micro-front-ends' &&
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
     timeout-minutes: 5

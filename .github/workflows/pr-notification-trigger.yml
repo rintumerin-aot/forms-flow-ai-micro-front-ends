@@ -28,7 +28,7 @@ permissions: {}
 jobs:
   capture:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.base.repo.full_name == 'AOT-Technologies/forms-flow-ai-micro-front-ends'
+    if: github.event.pull_request.base.repo.full_name == 'rintumerin-aot/forms-flow-ai-micro-front-ends'
     timeout-minutes: 5
     steps:
       - name: Record PR number
